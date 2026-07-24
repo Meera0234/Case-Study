@@ -102,7 +102,7 @@ Four fields go beyond the minimum, each earning its place by catching a real def
 ## Libraries used
 
 | Library |
-|---|---|---|
+|---|
 | **LangGraph** | 
 | **LangChain Core** | 
 | **Pydantic** | 

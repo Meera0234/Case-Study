@@ -1,6 +1,6 @@
 # Invoice Processing Agent
 
-Automates supplier invoice handling end to end — **Ingestion → Validation → Approval → Payment** — as a LangGraph state machine over one shared state object.
+Automates supplier invoice handling end to end - **Ingestion → Validation → Approval → Payment** — as a LangGraph state machine over one shared state object.
 
 Run against the 20 sample files, it clears 7 invoices for payment with no human involvement and holds the other 10, holding 10 of the 11 that carry a defect before any money moves, and blocking a further **$12,975** of second payment attempts. The held invoices include **$1,940 of billing that reads as correct on the page**. Every figure in the impact report is itemised by invoice and reconciles to the file count.
 

@@ -31,8 +31,6 @@ export LLM_PROVIDER=gemini && export GEMINI_API_KEY=AIza...
 
 ---
 
-## The one decision everything else follows from
-
 **The model reads and explains. Code counts and decides.**
 
 | Job | Owner | Why |
@@ -64,7 +62,7 @@ ingest → validate ─┬─(critical)─────────────�
 
 ---
 
-## What it catches that a person would not
+## What the agents caught
 
 Six of the sample invoices carry defects that survive a careful human read, because the wrong number looks exactly like a right one.
 

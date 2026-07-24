@@ -107,7 +107,7 @@ footer{margin-top:36px;font-size:12.5px;color:var(--muted);text-align:center}
 </style></head>
 <body><div class="wrap">
   <h1>Invoice review</h1>
-  <p class="sub">Accounts payable &nbsp;&middot;&nbsp; 24 July 2026, 00:23
+  <p class="sub">Accounts payable &nbsp;&middot;&nbsp; 24 July 2026, 05:03
      <br>20 files: 11 need attention,
      7 paid, 2 blocked
      <br><span class="basisnote">Card counts are per file. The summary below counts
@@ -115,12 +115,12 @@ footer{margin-top:36px;font-size:12.5px;color:var(--muted);text-align:center}
 
   <div class="impact">
     <h2>Run summary</h2>
-    <div class="stats"><div class='stat'><b class='num'>17</b><span>unique invoices, from 20 files</span></div><div class='stat'><b class='num'>41%</b><span>paid with no human touch (7 of 17)</span></div><div class='stat'><b class='num'>11</b><span>defects caught pre-payment (of 17)</span></div><div class='stat'><b class='num'>$1,940.00</b><span>money at risk, stopped</span></div><div class='stat'><b class='num'>26ms</b><span>per invoice, vs 5 days</span></div></div>
+    <div class="stats"><div class='stat'><b class='num'>17</b><span>unique invoices, from 20 files</span></div><div class='stat'><b class='num'>41%</b><span>paid with no human touch (7 of 17)</span></div><div class='stat'><b class='num'>11</b><span>defects caught pre-payment (of 17)</span></div><div class='stat'><b class='num'>$1,940.00</b><span>money at risk, stopped</span></div><div class='stat'><b class='num'>19ms</b><span>per invoice, vs 5 days</span></div></div>
     <div class="headline">11 of 17 invoices carried a defect: 10 held before payment, 1 approved after review. Held invoices account for $1,940.00 of overstated or duplicated billing. The ledger also stopped 2 repeat payments worth $12,975.00.</div>
     <div class="basis"><b>Counting basis.</b> 20 files read = 17 unique invoices (7 paid + 10 held) + 3 re-reads of an already-seen document (2 blocked at the payment ledger, 1 reaching the same outcome as before). Rates below are per unique invoice.</div>
     <details class="prov">
       <summary>How these figures are calculated</summary>
-      <div class='sec'>Money at risk: $1,940.00</div><table><tr><td class='num'>$1,890.00</td><td><b>INV-1004</b> INVOICE_REVISION<br><span class='info'>overlap with $1,890.00 already committed against this invoice number</span></td></tr><tr><td class='num'>$0.00</td><td><b>INV-1007</b> AMOUNT_MISMATCH<br><span class='info'>understated; costs the supplier, not the client</span></td></tr><tr><td class='num'>$50.00</td><td><b>INV-1013</b> AMOUNT_MISMATCH<br><span class='info'>overstatement that would have been paid</span></td></tr></table><div class='sec'>Repeat payments stopped: $12,975.00</div><div class='note'>Counted separately from the figure above.</div><table><tr><td class='num'>$3,000.00</td><td><b>INV-1011</b><br><span class='info'>INV-1011 was already paid on 2026-07-24T00:23:47</span></td></tr><tr><td class='num'>$9,975.00</td><td><b>INV-1012</b><br><span class='info'>INV-1012 was already paid on 2026-07-24T00:23:47</span></td></tr></table><div class='sec'>Defects, by outcome</div><table><tr><td class='num'>10</td><td>held before any money moved</td></tr><tr><td class='num'>1</td><td>approved after review<br><span class='info'>a warning does not block payment; the flag stays on the record either way</span></td></tr></table><div class='sec'>Assumptions</div><ul class='assum'><li>A revision to an invoice number already on file is held for manual reconciliation rather than superseding the original. The document alone does not distinguish an amendment from a re-submission.</li><li>Invoices not denominated in USD are held rather than converted, since no exchange rate is available offline.</li><li>Rates are per unique invoice. A file that repeats a document already read is counted separately.</li><li>A stated total below the line-item sum is valued at zero, since it costs the supplier rather than the client.</li><li>Manual review time is an estimate. Substitute a measured figure before using these numbers for a return-on-investment case.</li><li>The 30% error rate and five-day cycle time are the figures given in the brief, not results from this run.</li></ul>
+      <div class='sec'>Money at risk: $1,940.00</div><table><tr><td class='num'>$1,890.00</td><td><b>INV-1004</b> INVOICE_REVISION<br><span class='info'>overlap with $1,890.00 already committed against this invoice number</span></td></tr><tr><td class='num'>$0.00</td><td><b>INV-1007</b> AMOUNT_MISMATCH<br><span class='info'>understated; costs the supplier, not the client</span></td></tr><tr><td class='num'>$50.00</td><td><b>INV-1013</b> AMOUNT_MISMATCH<br><span class='info'>overstatement that would have been paid</span></td></tr></table><div class='sec'>Repeat payments stopped: $12,975.00</div><div class='note'>Counted separately from the figure above.</div><table><tr><td class='num'>$3,000.00</td><td><b>INV-1011</b><br><span class='info'>INV-1011 was already paid on 2026-07-24T05:03:40</span></td></tr><tr><td class='num'>$9,975.00</td><td><b>INV-1012</b><br><span class='info'>INV-1012 was already paid on 2026-07-24T05:03:40</span></td></tr></table><div class='sec'>Defects, by outcome</div><table><tr><td class='num'>10</td><td>held before any money moved</td></tr><tr><td class='num'>1</td><td>approved after review<br><span class='info'>a warning does not block payment; the flag stays on the record either way</span></td></tr></table><div class='sec'>Assumptions</div><ul class='assum'><li>A revision to an invoice number already on file is held for manual reconciliation rather than superseding the original. The document alone does not distinguish an amendment from a re-submission.</li><li>Invoices not denominated in USD are held rather than converted, since no exchange rate is available offline.</li><li>Rates are per unique invoice. A file that repeats a document already read is counted separately.</li><li>A stated total below the line-item sum is valued at zero, since it costs the supplier rather than the client.</li><li>Manual review time is an estimate. Substitute a measured figure before using these numbers for a return-on-investment case.</li><li>The 30% error rate and five-day cycle time are the figures given in the brief, not results from this run.</li></ul>
     </details>
   </div>
   <p class="caveat">The five-day and 30% baselines are the figures given in the brief,
@@ -159,7 +159,7 @@ footer{margin-top:36px;font-size:12.5px;color:var(--muted);text-align:center}
           <tr><td>Stated total</td><td class="num">$100,000.00</td></tr>
           <tr><td>Recomputed</td><td class="num">$100,000.00</td></tr>
           <tr><td>Currency</td><td>USD</td></tr>
-          <tr><td>Due</td><td>&amp;mdash;</td></tr>
+          <tr><td>Due</td><td>not found</td></tr>
         </table>
         <div class="sec">Line items</div>
         <table class="items">
@@ -647,7 +647,7 @@ NoProd Industries
     <span class="chev">&#9656;</span>
     <span class="id">INV-1009</span>
     <span class="vend">Unidentified vendor</span>
-    <span class="amt">$-250.00</span>
+    <span class="amt">-$250.00</span>
     <span class="pill held">Needs review</span>
   </div>
   <div class="body">
@@ -663,17 +663,17 @@ NoProd Industries
         <div class="sec">What we read</div>
         <table>
           <tr><td>Invoice</td><td>INV-1009</td></tr>
-          <tr><td>Vendor</td><td>&amp;mdash;</td></tr>
-          <tr><td>Stated total</td><td class="num">$-250.00</td></tr>
-          <tr><td>Recomputed</td><td class="num">$-250.00</td></tr>
+          <tr><td>Vendor</td><td>not found</td></tr>
+          <tr><td>Stated total</td><td class="num">-$250.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">-$250.00</td></tr>
           <tr><td>Currency</td><td>USD</td></tr>
-          <tr><td>Due</td><td>&amp;mdash;</td></tr>
+          <tr><td>Due</td><td>not found</td></tr>
         </table>
         <div class="sec">Line items</div>
         <table class="items">
           <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
               <th class="num">Line total</th></tr>
-          <tr><td>WidgetA</td><td class='num qty'>-5</td><td class='num'>$250.00</td><td class='num total'>$-1,250.00</td></tr><tr><td>WidgetB</td><td class='num qty'>2</td><td class='num'>$500.00</td><td class='num total'>$1,000.00</td></tr>
+          <tr><td>WidgetA</td><td class='num qty'>-5</td><td class='num'>$250.00</td><td class='num total'>-$1,250.00</td></tr><tr><td>WidgetB</td><td class='num qty'>2</td><td class='num'>$500.00</td><td class='num total'>$1,000.00</td></tr>
         </table>
         
       </div>
@@ -712,7 +712,7 @@ NoProd Industries
     <span class="chev">&#9656;</span>
     <span class="id">INV-1014</span>
     <span class="vend">TechParts International</span>
-    <span class="amt">$4,125.00</span>
+    <span class="amt">€4,125.00</span>
     <span class="pill held">Needs review</span>
   </div>
   <div class="body">
@@ -729,8 +729,8 @@ NoProd Industries
         <table>
           <tr><td>Invoice</td><td>INV-1014</td></tr>
           <tr><td>Vendor</td><td>TechParts International</td></tr>
-          <tr><td>Stated total</td><td class="num">$4,125.00</td></tr>
-          <tr><td>Recomputed</td><td class="num">$4,125.00</td></tr>
+          <tr><td>Stated total</td><td class="num">€4,125.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">€4,125.00</td></tr>
           <tr><td>Currency</td><td>EUR</td></tr>
           <tr><td>Due</td><td>2026-02-26</td></tr>
         </table>
@@ -738,7 +738,7 @@ NoProd Industries
         <table class="items">
           <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
               <th class="num">Line total</th></tr>
-          <tr><td>WidgetA</td><td class='num qty'>4</td><td class='num'>$225.00</td><td class='num total'>$900.00</td></tr><tr><td>WidgetB</td><td class='num qty'>6</td><td class='num'>$475.00</td><td class='num total'>$2,850.00</td></tr>
+          <tr><td>WidgetA</td><td class='num qty'>4</td><td class='num'>€225.00</td><td class='num total'>€900.00</td></tr><tr><td>WidgetB</td><td class='num qty'>6</td><td class='num'>€475.00</td><td class='num total'>€2,850.00</td></tr>
         </table>
         
       </div>
@@ -881,7 +881,7 @@ NoProd Industries
               <th class="num">Line total</th></tr>
           <tr><td>Widget A</td><td class='num qty'>12</td><td class='num'>$250.00</td><td class='num total'>$3,000.00</td></tr><tr><td>WidgetB</td><td class='num qty'>7</td><td class='num'>$500.00</td><td class='num total'>$3,500.00</td></tr><tr><td>Gadget X</td><td class='num qty'>4</td><td class='num'>$750.00</td><td class='num total'>$3,000.00</td></tr>
         </table>
-        <div class='meta'>OCR repair applied: capital &#x27;O&#x27; read as zero in numeric tokens</div><div class='meta'>Ref PO-20260115. Deliver to</div>
+        <div class='meta'>OCR repair applied: capital &#x27;O&#x27; read as zero in numeric tokens</div><div class='meta'>Ref PO-20260115. Deliver to warehouse dock B. Contact Jim at ext 4421 with questions.</div>
       </div>
       <div>
         <div class="sec">Original document</div>
@@ -950,7 +950,7 @@ Terms: Net 30</pre>
               <th class="num">Line total</th></tr>
           <tr><td>Widget A</td><td class='num qty'>12</td><td class='num'>$250.00</td><td class='num total'>$3,000.00</td></tr><tr><td>WidgetB</td><td class='num qty'>7</td><td class='num'>$500.00</td><td class='num total'>$3,500.00</td></tr><tr><td>Gadget X</td><td class='num qty'>4</td><td class='num'>$750.00</td><td class='num total'>$3,000.00</td></tr>
         </table>
-        <div class='meta'>OCR repair applied: capital &#x27;O&#x27; read as zero in numeric tokens</div><div class='meta'>Ref PO-20260115. Deliver to</div>
+        <div class='meta'>OCR repair applied: capital &#x27;O&#x27; read as zero in numeric tokens</div><div class='meta'>Ref PO-20260115. Deliver to warehouse dock B. Contact Jim at ext 4421 with questions.</div>
       </div>
       <div>
         <div class="sec">Original document</div>
@@ -988,7 +988,7 @@ Terms: Net 30</pre>
 [validate] status=warning, 0 critical, 1 warning
 [approve_draft] rule-based decision=approved (round 0)
 [approve_critique] no usable critique; confirming draft
-[pay] blocked: INV-1012 already paid on 2026-07-24T00:23:47</pre>
+[pay] blocked: INV-1012 already paid on 2026-07-24T05:03:40</pre>
       </div>
     </div>
   </div>
@@ -1373,7 +1373,7 @@ Payment Terms: Net 30
 [validate] status=passed, 0 critical, 0 warning
 [approve_draft] rule-based decision=approved (round 0)
 [approve_critique] no usable critique; confirming draft
-[pay] blocked: INV-1011 already paid on 2026-07-24T00:23:47</pre>
+[pay] blocked: INV-1011 already paid on 2026-07-24T05:03:40</pre>
       </div>
     </div>
   </div>

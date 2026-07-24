@@ -22,9 +22,7 @@ open logs/invoice-review.html
 **No API key is needed.** With no key, every LLM step falls back to a deterministic implementation and the whole pipeline still runs, offline, with the same routing decisions. A key adds real reasoning to extraction and approval:
 
 ```bash
-export GROQ_API_KEY=gsk_...                              # default
-# or
-export LLM_PROVIDER=gemini && export GEMINI_API_KEY=AIza...
+export API_KEY=                            
 ```
 
 `inventory.db` is created and seeded automatically on first run. There is no setup step.
@@ -101,21 +99,19 @@ Four fields go beyond the minimum, each earning its place by catching a real def
 
 ---
 
-## Why these libraries
+## Libraries used
 
-| Library | Why | Why not something else |
+| Library |
 |---|---|---|
-| **LangGraph** | The approval loop is a genuine cycle — critique can send a decision back for redrafting. Expressing that as a graph with a recursion limit means the loop cannot spin. | A linear function chain cannot express the cycle without hand-rolled loop guards. |
-| **LangChain Core** | `ChatPromptTemplate` keeps all three prompts declared once in `llm_client.py` with named variables. When a client says "the approval reasoning is too lenient," there is one file to open. | f-strings scattered through agent files means prompt changes touch four files. |
-| **Pydantic** | Validates LLM JSON at the boundary. A malformed response is caught before it can write a null vendor into a payment record. | Trusting `json.loads` means bad data propagates silently. |
-| **pdfplumber** | Reads the text layer directly. | PyMuPDF is faster but heavier; neither reads scans, which are out of scope. |
+| **LangGraph** | 
+| **LangChain Core** | 
+| **Pydantic** | 
+| **pdfplumber** | 
 
 
 ---
 
 ## Failsafes and guardrails
-
-Every one of these is tested by `python diagnostic.py`, which attacks them rather than asserting them.
 
 **If an agent fails.** Ingestion never raises — a missing, empty, corrupt, or truncated file returns a well-formed empty result with the reason in `extraction_notes`, which validation turns into a critical finding. A crash anywhere in the graph is caught in `main.run_invoice`, recorded in `state["error"]`, and the invoice is *not* paid. Nothing in the pipeline can fail open.
 
@@ -180,7 +176,7 @@ Named deliberately, because what was left out is as much a decision as what went
 
 ---
 
-## Known limitations
+## Limitations
 
 - The `$10,000` scrutiny branch is exercised by INV-1012 but every invoice *above* the threshold in this dataset also has a critical failure, so it routes to rejection before approval reasoning runs. A clean high-value invoice would be needed to demo that path fully.
 - The critique loop only revises when a live LLM is connected. Without a key, the draft is accepted unchanged — the loop is present and capped, but silent.

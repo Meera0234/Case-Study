@@ -22,7 +22,7 @@ open logs/invoice-review.html
 **No API key is needed.** With no key, every LLM step falls back to a deterministic implementation and the whole pipeline still runs, offline, with the same routing decisions. A key adds real reasoning to extraction and approval:
 
 ```bash
-export API_KEY=                            
+export API_KEY = ""                           
 ```
 
 `inventory.db` is created and seeded automatically on first run. There is no setup step.
@@ -123,7 +123,7 @@ Four fields go beyond the minimum, each earning its place by catching a real def
 2. `allowed_outcomes` prevents an approved decision existing at all.
 3. `payment.payment_blockers` re-checks independently, immediately before the call.
 
-The third exists because the first two are decisions made elsewhere. If a future edit reorders the graph, that function is what stops the money. It refuses on: any critical finding, a decision that isn't `approved`, no identified payee, a non-positive amount, or a non-USD currency.
+If a future edit reorders the graph, that function is what stops the money. It refuses on: any critical finding, a decision that isn't `approved`, no identified payee, a non-positive amount, or a non-USD currency.
 
 **Money cannot move twice.** `db/ledger.py` records every payment, keyed on invoice number, checked immediately before paying. Re-running the same invoice blocks rather than double-paying.
 
@@ -131,7 +131,7 @@ The third exists because the first two are decisions made elsewhere. If a future
 
 ---
 
-## Stated assumptions
+## Assumptions
 
 Where the system chose a policy rather than measured a fact, the policy is published in the impact report rather than left to be inferred:
 
@@ -144,8 +144,6 @@ Where the system chose a policy rather than measured a fact, the policy is publi
 ---
 
 ## Scope cuts
-
-Named deliberately, because what was left out is as much a decision as what went in.
 
 - **Text-layer PDFs only.** Scanned invoices need real OCR — a separate project, and the honest answer is that this system reports them as unreadable rather than guessing.
 - **No vendor master data.** The vendor name is taken as extracted, not verified against a supplier list. This is the single biggest remaining fraud gap.

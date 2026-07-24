@@ -110,7 +110,6 @@ Four fields go beyond the minimum, each earning its place by catching a real def
 | **Pydantic** | Validates LLM JSON at the boundary. A malformed response is caught before it can write a null vendor into a payment record. | Trusting `json.loads` means bad data propagates silently. |
 | **pdfplumber** | Reads the text layer directly. | PyMuPDF is faster but heavier; neither reads scans, which are out of scope. |
 
-Both LangChain and Pydantic are **optional imports** — if absent, equivalent local code takes over. The no-key path depends on nothing but the standard library and pdfplumber, which is what lets this run on a locked-down machine.
 
 ---
 
@@ -122,7 +121,7 @@ Every one of these is tested by `python diagnostic.py`, which attacks them rathe
 
 **If the LLM fails or lies.** No key, no SDK, a timeout, a rate limit, or unparseable output all return `None` from `llm_client`, and the caller takes its deterministic path — a full LLM outage still completes the pipeline end to end. Output that *is* parseable but wrong-shaped is rejected by `schemas.py` before it reaches shared state. And a model that returns `"approved"` on an invoice with critical findings is overridden by `approval.allowed_outcomes` and the override is logged.
 
-**Payment, the one irreversible step, is gated three times over.**
+**Payment**
 
 1. The graph routes critical findings to rejection before approval runs.
 2. `allowed_outcomes` prevents an approved decision existing at all.

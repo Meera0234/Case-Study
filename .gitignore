@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.env
+inventory.db
+logs/run_*.json
+logs/impact.json
+.venv/
+venv/

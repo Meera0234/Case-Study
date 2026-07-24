@@ -1,0 +1,1451 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Invoice Review - Accounts Payable, 24 July 2026</title><style>
+:root{
+  color-scheme: light;
+  --bg:#f6f5f1; --panel:#fffefb; --ink:#1a1a17; --muted:#6b6a63; --line:#e0ded5;
+  --accent:#0f5c58; --crit:#a02020; --warn:#8a5a00; --ok:#2b6a3f;
+  --crit-bg:#fbeaea; --warn-bg:#fbf3e2; --ok-bg:#eaf3ec;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
+h1{font-size:26px;letter-spacing:-.02em;margin:0 0 4px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 32px}
+.basisnote{font-size:12.5px;color:var(--muted);display:inline-block;margin-top:4px}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+.impact{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:24px 26px;margin-bottom:14px}
+.impact h2{font-size:12px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 18px;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:22px}
+.stat b{display:block;font-size:27px;letter-spacing:-.02em;line-height:1.15}
+.stat span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
+.headline{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);
+  font-size:14.5px;color:#333}
+.caveat{font-size:12.5px;color:var(--muted);margin:0 0 30px;padding-left:2px}
+.basis{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--muted)}
+.prov{margin-top:14px;font-size:13px;border:1px solid var(--line);border-radius:7px;
+  padding:10px 14px;background:#faf9f5}
+.prov summary{cursor:pointer;font-weight:600;color:var(--ink);font-size:13px}
+.prov table{margin-top:6px}
+.prov td.num{width:120px;text-align:right;font-weight:600;vertical-align:top;
+  padding-right:16px;white-space:nowrap}
+.prov td{padding:7px 0}
+.prov .note{font-size:12.5px;color:var(--muted);text-transform:none;
+  letter-spacing:0;font-weight:400;margin:-4px 0 8px}
+.assum{margin:6px 0 0;padding-left:18px;color:#4a4a44}
+.assum li{margin-bottom:5px}
+
+.tabs{display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap}
+.tab{background:var(--panel);border:1px solid var(--line);border-radius:999px;
+  padding:7px 15px;font-size:13.5px;cursor:pointer;color:var(--muted)}
+.tab:hover{border-color:#c9c6ba}
+.tab.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  margin-bottom:11px;overflow:hidden}
+.card.crit{border-left:3px solid var(--crit)}
+.card.warnrow{border-left:3px solid var(--warn)}
+.card.okrow{border-left:3px solid var(--ok)}
+.head{display:flex;align-items:center;gap:16px;padding:15px 20px;cursor:pointer}
+.head:hover{background:#faf9f5}
+.id{font-weight:600;min-width:96px;letter-spacing:-.01em}
+.vend{flex:1;color:var(--muted);font-size:14px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.amt{font-variant-numeric:tabular-nums;font-size:15px;min-width:112px;text-align:right}
+.amt s{color:var(--muted);font-size:12.5px;display:block;text-decoration:line-through}
+.pill{font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:999px;
+  min-width:104px;text-align:center;letter-spacing:.01em}
+.pill.paid{background:var(--ok-bg);color:var(--ok)}
+.pill.held{background:var(--crit-bg);color:var(--crit)}
+.pill.blocked{background:var(--warn-bg);color:var(--warn)}
+.chev{color:var(--muted);font-size:12px;width:12px}
+
+.body{display:none;padding:4px 20px 22px;border-top:1px solid var(--line)}
+.card.open .body{display:block}
+.card.open .chev{transform:rotate(90deg)}
+.chev{display:inline-block;transition:transform .15s}
+
+.sec{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  font-weight:600;margin:20px 0 9px}
+.issue{border-radius:7px;padding:11px 14px;margin-bottom:7px;font-size:14px}
+.issue.critical{background:var(--crit-bg)}
+.issue.warning{background:var(--warn-bg)}
+.issue.info{background:#f1f0ea}
+.issue .t{font-weight:600;margin-bottom:2px}
+.issue .m{color:#3a3a35}
+.issue .a{margin-top:7px;padding-top:7px;border-top:1px solid rgba(0,0,0,.09);
+  font-size:13px;color:#4a4a44}
+.issue .a b{font-weight:600}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.cols{grid-template-columns:1fr}}
+pre{background:#f1f0ea;border:1px solid var(--line);border-radius:7px;padding:13px;
+  font:12px/1.5 ui-monospace,"SF Mono",Menlo,monospace;overflow:auto;max-height:270px;
+  margin:0;white-space:pre-wrap;word-break:break-word}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+table.items th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;text-align:left;padding-bottom:4px}
+table.items th.num{text-align:right}
+td.qty{width:52px;color:var(--muted)}
+td.total{font-weight:600}
+.items td.num{padding-left:14px}
+td{padding:5px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--muted);width:38%}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.reason{background:#f1f0ea;border-radius:7px;padding:13px 15px;font-size:14px}
+.meta{font-size:12.5px;color:var(--muted);margin-top:7px}
+.trail{font:12px/1.65 ui-monospace,"SF Mono",Menlo,monospace;color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:50px;font-size:14px}
+footer{margin-top:36px;font-size:12.5px;color:var(--muted);text-align:center}
+</style></head>
+<body><div class="wrap">
+  <h1>Invoice review</h1>
+  <p class="sub">Accounts payable &nbsp;&middot;&nbsp; 24 July 2026, 01:42
+     <br>20 files: 11 need attention,
+     7 paid, 2 blocked
+     <br><span class="basisnote">Card counts are per file. The summary below counts
+     unique invoices; see the counting basis.</span></p>
+
+  <div class="impact">
+    <h2>Run summary</h2>
+    <div class="stats"><div class='stat'><b class='num'>17</b><span>unique invoices, from 20 files</span></div><div class='stat'><b class='num'>41%</b><span>paid with no human touch (7 of 17)</span></div><div class='stat'><b class='num'>11</b><span>defects caught pre-payment (of 17)</span></div><div class='stat'><b class='num'>$1,940.00</b><span>money at risk, stopped</span></div><div class='stat'><b class='num'>30ms</b><span>per invoice, vs 5 days</span></div></div>
+    <div class="headline">11 of 17 invoices carried a defect: 10 held before payment, 1 approved after review. Held invoices account for $1,940.00 of overstated or duplicated billing. The ledger also stopped 2 repeat payments worth $12,975.00.</div>
+    <div class="basis"><b>Counting basis.</b> 20 files read = 17 unique invoices (7 paid + 10 held) + 3 re-reads of an already-seen document (2 blocked at the payment ledger, 1 reaching the same outcome as before). Rates below are per unique invoice.</div>
+    <details class="prov">
+      <summary>How these figures are calculated</summary>
+      <div class='sec'>Money at risk: $1,940.00</div><table><tr><td class='num'>$1,890.00</td><td><b>INV-1004</b> INVOICE_REVISION<br><span class='info'>overlap with $1,890.00 already committed against this invoice number</span></td></tr><tr><td class='num'>$0.00</td><td><b>INV-1007</b> AMOUNT_MISMATCH<br><span class='info'>understated; costs the supplier, not the client</span></td></tr><tr><td class='num'>$50.00</td><td><b>INV-1013</b> AMOUNT_MISMATCH<br><span class='info'>overstatement that would have been paid</span></td></tr></table><div class='sec'>Repeat payments stopped: $12,975.00</div><div class='note'>Counted separately from the figure above.</div><table><tr><td class='num'>$3,000.00</td><td><b>INV-1011</b><br><span class='info'>INV-1011 was already paid on 2026-07-24T01:42:25</span></td></tr><tr><td class='num'>$9,975.00</td><td><b>INV-1012</b><br><span class='info'>INV-1012 was already paid on 2026-07-24T01:42:25</span></td></tr></table><div class='sec'>Defects, by outcome</div><table><tr><td class='num'>10</td><td>held before any money moved</td></tr><tr><td class='num'>1</td><td>approved after review<br><span class='info'>a warning does not block payment; the flag stays on the record either way</span></td></tr></table><div class='sec'>Assumptions</div><ul class='assum'><li>A revision to an invoice number already on file is held for manual reconciliation rather than superseding the original. The document alone does not distinguish an amendment from a re-submission.</li><li>Invoices not denominated in USD are held rather than converted, since no exchange rate is available offline.</li><li>Rates are per unique invoice. A file that repeats a document already read is counted separately.</li><li>A stated total below the line-item sum is valued at zero, since it costs the supplier rather than the client.</li><li>Manual review time is an estimate. Substitute a measured figure before using these numbers for a return-on-investment case.</li><li>The 30% error rate and five-day cycle time are the figures given in the brief, not results from this run.</li></ul>
+    </details>
+  </div>
+  <p class="caveat">The five-day and 30% baselines are the figures given in the brief,
+     not results from this run.</p>
+
+  <div class="tabs">
+    <button class="tab on" onclick="filt(this,'all')">Everything</button>
+    <button class="tab" onclick="filt(this,'attention')">Needs attention (11)</button>
+    <button class="tab" onclick="filt(this,'paid')">Paid (7)</button>
+    <button class="tab" onclick="filt(this,'blocked')">Blocked (2)</button>
+  </div>
+
+  
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1003</span>
+    <span class="vend">Fraudster LLC</span>
+    <span class="amt">$100,000.00</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue warning'><div class='t'>No usable due date</div><div class='m'>No usable due date; payment timing cannot be scheduled</div><div class='a'><b>What to do:</b> Confirm payment terms with the supplier so the payment can be scheduled.</div></div><div class='issue critical'><div class='t'>Item exists but has zero stock</div><div class='m'>&#x27;FakeItem&#x27; has zero stock on hand</div><div class='a'><b>What to do:</b> Verify this item was really ordered and received. Billing for an item with zero stock is a common phantom-invoice pattern.</div></div><div class='issue warning'><div class='t'>Payment-pressure wording typical of invoice fraud</div><div class='m'>Payment-pressure wording present: urgent, immediately, wire transfer, avoid penalt</div><div class='a'><b>What to do:</b> Verify the supplier using a contact you already hold, never the details printed on the invoice.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: &#x27;FakeItem&#x27; has zero stock on hand</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: yes
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1003</td></tr>
+          <tr><td>Vendor</td><td>Fraudster LLC</td></tr>
+          <tr><td>Stated total</td><td class="num">$100,000.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$100,000.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>&amp;mdash;</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>FakeItem</td><td class='num qty'>100</td><td class='num'>$1,000.00</td><td class='num total'>$100,000.00</td></tr>
+        </table>
+        <div class='meta'>Due date &#x27;yesterday&#x27; is not a parseable date</div><div class='meta'>URGENT - Pay immediately to avoid penalties!!! Wire transfer preferred.</div>
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>INVOICE
+
+Vendor: Fraudster LLC
+Invoice Number: INV-1003
+Date: 2026-01-20
+Due Date: yesterday
+
+Items:
+  FakeItem   qty: 100   unit price: $1,000.00
+
+Total Amount: $100,000.00
+
+Payment Terms: Immediate
+Notes: URGENT - Pay immediately to avoid penalties!!! Wire transfer preferred.
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1003.txt via fallback_regex: 1 item(s), stated=100000.0, recomputed=100000.0
+[validate] status=failed, 1 critical, 2 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: &#x27;FakeItem&#x27; has zero stock on hand</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1007</span>
+    <span class="vend">MegaWidgets Corp</span>
+    <span class="amt"><s>$15,525.00</s>$15,635.00</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue critical'><div class='t'>Stated total does not match the line items</div><div class='m'>Stated total $15,525.00 is understated by $110.00; line items plus tax come to $15,635.00</div><div class='a'><b>What to do:</b> Pay the recomputed amount, or request a corrected invoice. Do not pay the stated total.</div></div><div class='issue critical'><div class='t'>Requested quantity exceeds stock on hand</div><div class='m'>&#x27;WidgetA&#x27;: 20 requested, 15 in stock</div><div class='a'><b>What to do:</b> Check the receiving log. If the goods arrived, inventory is stale; if not, query the quantity with the supplier.</div></div><div class='issue critical'><div class='t'>Requested quantity exceeds stock on hand</div><div class='m'>&#x27;WidgetB&#x27;: 15 requested, 10 in stock</div><div class='a'><b>What to do:</b> Check the receiving log. If the goods arrived, inventory is stale; if not, query the quantity with the supplier.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: Stated total $15,525.00 is understated by $110.00; line items plus tax come to $15,635.00; &#x27;WidgetA&#x27;: 20 requested, 15 in stock; &#x27;WidgetB&#x27;: 15 requested, 10 in stock</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: yes
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1007</td></tr>
+          <tr><td>Vendor</td><td>MegaWidgets Corp</td></tr>
+          <tr><td>Stated total</td><td class="num">$15,525.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$15,635.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-28</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>20</td><td class='num'>$250.00</td><td class='num total'>$5,000.00</td></tr><tr><td>WidgetB</td><td class='num qty'>15</td><td class='num'>$500.00</td><td class='num total'>$7,500.00</td></tr><tr><td>GadgetX</td><td class='num qty'>3</td><td class='num'>$750.00</td><td class='num total'>$2,250.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>Invoice Number,Vendor,Date,Due Date,Item,Qty,Unit Price,Line Total
+INV-1007,MegaWidgets Corp,01/28/2026,02/28/2026,WidgetA,20,250.00,5000.00
+INV-1007,MegaWidgets Corp,01/28/2026,02/28/2026,WidgetB,15,500.00,7500.00
+INV-1007,MegaWidgets Corp,01/28/2026,02/28/2026,GadgetX,3,750.00,2250.00
+,,,,,,Subtotal:,14750.00
+,,,,,,Tax (6%):,885.00
+,,,,,,Total:,15525.00
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1007.csv via fallback_regex: 3 item(s), stated=15525.0, recomputed=15635.0
+[validate] status=failed, 3 critical, 0 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: Stated total $15,525.00 is understated by $110.00; line items plus tax come to $15,635.00; &#x27;WidgetA&#x27;: 20 requested, 15 in stock; &#x27;WidgetB&#x27;: 15 requested, 10 in stock</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1013</span>
+    <span class="vend">Atlas Industrial Supply</span>
+    <span class="amt"><s>$22,562.80</s>$22,512.80</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue critical'><div class='t'>Stated total does not match the line items</div><div class='m'>Stated total $22,562.80 is overstated by $50.00; line items plus tax come to $22,512.80</div><div class='a'><b>What to do:</b> Pay the recomputed amount, or request a corrected invoice. Do not pay the stated total.</div></div><div class='issue critical'><div class='t'>Requested quantity exceeds stock on hand</div><div class='m'>&#x27;GadgetX&#x27;: 9 requested, 5 in stock</div><div class='a'><b>What to do:</b> Check the receiving log. If the goods arrived, inventory is stale; if not, query the quantity with the supplier.</div></div><div class='issue critical'><div class='t'>Requested quantity exceeds stock on hand</div><div class='m'>&#x27;WidgetA&#x27;: 22 requested, 15 in stock</div><div class='a'><b>What to do:</b> Check the receiving log. If the goods arrived, inventory is stale; if not, query the quantity with the supplier.</div></div><div class='issue critical'><div class='t'>Requested quantity exceeds stock on hand</div><div class='m'>&#x27;WidgetB&#x27;: 18 requested, 10 in stock</div><div class='a'><b>What to do:</b> Check the receiving log. If the goods arrived, inventory is stale; if not, query the quantity with the supplier.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: Stated total $22,562.80 is overstated by $50.00; line items plus tax come to $22,512.80; &#x27;GadgetX&#x27;: 9 requested, 5 in stock; &#x27;WidgetA&#x27;: 22 requested, 15 in stock; &#x27;WidgetB&#x27;: 18 requested, 10 in stock</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: yes
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1013</td></tr>
+          <tr><td>Vendor</td><td>Atlas Industrial Supply</td></tr>
+          <tr><td>Stated total</td><td class="num">$22,562.80</td></tr>
+          <tr><td>Recomputed</td><td class="num">$22,512.80</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-03-24</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>15</td><td class='num'>$250.00</td><td class='num total'>$3,750.00</td></tr><tr><td>WidgetB</td><td class='num qty'>10</td><td class='num'>$500.00</td><td class='num total'>$5,000.00</td></tr><tr><td>GadgetX</td><td class='num qty'>5</td><td class='num'>$750.00</td><td class='num total'>$3,750.00</td></tr><tr><td>WidgetA</td><td class='num qty'>5</td><td class='num'>$240.00</td><td class='num total'>$1,200.00</td></tr><tr><td>WidgetB</td><td class='num qty'>8</td><td class='num'>$480.00</td><td class='num total'>$3,840.00</td></tr><tr><td>GadgetX</td><td class='num qty'>3</td><td class='num'>$750.00</td><td class='num total'>$2,250.00</td></tr><tr><td>WidgetA</td><td class='num qty'>2</td><td class='num'>$250.00</td><td class='num total'>$500.00</td></tr><tr><td>GadgetX</td><td class='num qty'>1</td><td class='num'>$750.00</td><td class='num total'>$750.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>{
+  &quot;invoice_number&quot;: &quot;INV-1013&quot;,
+  &quot;vendor&quot;: {
+    &quot;name&quot;: &quot;Atlas Industrial Supply&quot;,
+    &quot;address&quot;: &quot;500 Commerce Blvd, Detroit, MI 48201&quot;
+  },
+  &quot;date&quot;: &quot;2026-01-24&quot;,
+  &quot;due_date&quot;: &quot;2026-03-24&quot;,
+  &quot;line_items&quot;: [
+    {&quot;item&quot;: &quot;WidgetA&quot;, &quot;quantity&quot;: 15, &quot;unit_price&quot;: 250.00, &quot;amount&quot;: 3750.00},
+    {&quot;item&quot;: &quot;WidgetB&quot;, &quot;quantity&quot;: 10, &quot;unit_price&quot;: 500.00, &quot;amount&quot;: 5000.00},
+    {&quot;item&quot;: &quot;GadgetX&quot;, &quot;quantity&quot;: 5, &quot;unit_price&quot;: 750.00, &quot;amount&quot;: 3750.00},
+    {&quot;item&quot;: &quot;WidgetA&quot;, &quot;quantity&quot;: 5, &quot;unit_price&quot;: 240.00, &quot;amount&quot;: 1200.00, &quot;note&quot;: &quot;Volume discount&quot;},
+    {&quot;item&quot;: &quot;WidgetB&quot;, &quot;quantity&quot;: 8, &quot;unit_price&quot;: 480.00, &quot;amount&quot;: 3840.00, &quot;note&quot;: &quot;Volume discount&quot;},
+    {&quot;item&quot;: &quot;GadgetX&quot;, &quot;quantity&quot;: 3, &quot;unit_price&quot;: 750.00, &quot;amount&quot;: 2250.00, &quot;note&quot;: &quot;Expedited&quot;},
+    {&quot;item&quot;: &quot;WidgetA&quot;, &quot;quantity&quot;: 2, &quot;unit_price&quot;: 250.00, &quot;amount&quot;: 500.00, &quot;note&quot;: &quot;Replacement&quot;},
+    {&quot;item&quot;: &quot;GadgetX&quot;, &quot;quantity&quot;: 1, &quot;unit_price&quot;: 750.00, &quot;amount&quot;: 750.00, &quot;note&quot;: &quot;Sample&quot;}
+  ],
+  &quot;subtotal&quot;: 21040.00,
+  &quot;tax_rate&quot;: 0.07,
+  &quot;tax_amount&quot;: 1472.80,
+  &quot;total&quot;: 22562.80,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;payment_terms&quot;: &quot;Net 60&quot;
+}
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1013.json via fallback_regex: 8 item(s), stated=22562.8, recomputed=22512.8
+[validate] status=failed, 4 critical, 0 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: Stated total $22,562.80 is overstated by $50.00; line items plus tax come to $22,512.80; &#x27;GadgetX&#x27;: 9 requested, 5 in stock; &#x27;WidgetA&#x27;: 22 requested, 15 in stock; &#x27;WidgetB&#x27;: 18 requested, 10 in stock</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1013</span>
+    <span class="vend">Atlas Industrial Supply</span>
+    <span class="amt"><s>$22,562.80</s>$22,512.80</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue critical'><div class='t'>Stated total does not match the line items</div><div class='m'>Stated total $22,562.80 is overstated by $50.00; line items plus tax come to $22,512.80</div><div class='a'><b>What to do:</b> Pay the recomputed amount, or request a corrected invoice. Do not pay the stated total.</div></div><div class='issue critical'><div class='t'>Requested quantity exceeds stock on hand</div><div class='m'>&#x27;GadgetX&#x27;: 9 requested, 5 in stock</div><div class='a'><b>What to do:</b> Check the receiving log. If the goods arrived, inventory is stale; if not, query the quantity with the supplier.</div></div><div class='issue critical'><div class='t'>Requested quantity exceeds stock on hand</div><div class='m'>&#x27;WidgetA&#x27;: 22 requested, 15 in stock</div><div class='a'><b>What to do:</b> Check the receiving log. If the goods arrived, inventory is stale; if not, query the quantity with the supplier.</div></div><div class='issue critical'><div class='t'>Requested quantity exceeds stock on hand</div><div class='m'>&#x27;WidgetB&#x27;: 18 requested, 10 in stock</div><div class='a'><b>What to do:</b> Check the receiving log. If the goods arrived, inventory is stale; if not, query the quantity with the supplier.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: Stated total $22,562.80 is overstated by $50.00; line items plus tax come to $22,512.80; &#x27;GadgetX&#x27;: 9 requested, 5 in stock; &#x27;WidgetA&#x27;: 22 requested, 15 in stock; &#x27;WidgetB&#x27;: 18 requested, 10 in stock</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: yes
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1013</td></tr>
+          <tr><td>Vendor</td><td>Atlas Industrial Supply</td></tr>
+          <tr><td>Stated total</td><td class="num">$22,562.80</td></tr>
+          <tr><td>Recomputed</td><td class="num">$22,512.80</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-03-24</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>15</td><td class='num'>$250.00</td><td class='num total'>$3,750.00</td></tr><tr><td>WidgetB</td><td class='num qty'>10</td><td class='num'>$500.00</td><td class='num total'>$5,000.00</td></tr><tr><td>GadgetX</td><td class='num qty'>5</td><td class='num'>$750.00</td><td class='num total'>$3,750.00</td></tr><tr><td>WidgetA</td><td class='num qty'>5</td><td class='num'>$240.00</td><td class='num total'>$1,200.00</td></tr><tr><td>WidgetB</td><td class='num qty'>8</td><td class='num'>$480.00</td><td class='num total'>$3,840.00</td></tr><tr><td>GadgetX</td><td class='num qty'>3</td><td class='num'>$750.00</td><td class='num total'>$2,250.00</td></tr><tr><td>WidgetA</td><td class='num qty'>2</td><td class='num'>$250.00</td><td class='num total'>$500.00</td></tr><tr><td>GadgetX</td><td class='num qty'>1</td><td class='num'>$750.00</td><td class='num total'>$750.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>Bulk Order Invoice
+Invoice: INV-1013 Date: 2026-01-24
+Vendor: Atlas Industrial Supply Due: 2026-03-24
+Terms: Net 60
+Item Qty Unit Price Amount Notes
+WidgetA 15 $250.00 $3,750.00
+WidgetB 10 $500.00 $5,000.00
+GadgetX 5 $750.00 $3,750.00
+WidgetA 5 $240.00 $1,200.00 Volume discount
+WidgetB 8 $480.00 $3,840.00 Volume discount
+GadgetX 3 $750.00 $2,250.00 Expedited
+WidgetA 2 $250.00 $500.00 Replacement
+GadgetX 1 $750.00 $750.00 Sample
+Subtotal: $21,040.00
+Tax (7%): $1,472.80
+Grand Total: $22,562.80</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1013.pdf via fallback_regex: 8 item(s), stated=22562.8, recomputed=22512.8
+[validate] status=failed, 4 critical, 0 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: Stated total $22,562.80 is overstated by $50.00; line items plus tax come to $22,512.80; &#x27;GadgetX&#x27;: 9 requested, 5 in stock; &#x27;WidgetA&#x27;: 22 requested, 15 in stock; &#x27;WidgetB&#x27;: 18 requested, 10 in stock</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1002</span>
+    <span class="vend">Gadgets Co.</span>
+    <span class="amt">$15,000.00</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue critical'><div class='t'>Requested quantity exceeds stock on hand</div><div class='m'>&#x27;GadgetX&#x27;: 20 requested, 5 in stock</div><div class='a'><b>What to do:</b> Check the receiving log. If the goods arrived, inventory is stale; if not, query the quantity with the supplier.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: &#x27;GadgetX&#x27;: 20 requested, 5 in stock</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: yes
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1002</td></tr>
+          <tr><td>Vendor</td><td>Gadgets Co.</td></tr>
+          <tr><td>Stated total</td><td class="num">$15,000.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$15,000.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-01-30</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>GadgetX</td><td class='num qty'>20</td><td class='num'>$750.00</td><td class='num total'>$15,000.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>INVOCE
+
+Vndr: Gadgets Co.
+Inv #: 1002
+Dt: Jan 30 2026
+Due Dt: 2026-01-30
+
+Itms:
+  GadgetX  qty 20   @ $750 ea
+
+Amt: $15,000.00
+
+Pymnt Terms: Net 30
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1002.txt via fallback_regex: 1 item(s), stated=15000.0, recomputed=15000.0
+[validate] status=failed, 1 critical, 0 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: &#x27;GadgetX&#x27;: 20 requested, 5 in stock</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1004</span>
+    <span class="vend">Precision Parts Ltd.</span>
+    <span class="amt">$5,940.00</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue critical'><div class='t'>Invoice number already seen with different figures</div><div class='m'>Invoice INV-1004 was already seen from invoice_1004.json at $1,890.00; this copy states $5,940.00. Held for reconciliation -- paying both would pay twice for the items common to each.</div><div class='a'><b>What to do:</b> Compare against the earlier copy. If this supersedes it, cancel the original before paying; if it is a re-submission, reject it.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: Invoice INV-1004 was already seen from invoice_1004.json at $1,890.00; this copy states $5,940.00. Held for reconciliation -- paying both would pay twice for the items common to each.</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1004</td></tr>
+          <tr><td>Vendor</td><td>Precision Parts Ltd.</td></tr>
+          <tr><td>Stated total</td><td class="num">$5,940.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$5,940.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-22</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>3</td><td class='num'>$250.00</td><td class='num total'>$750.00</td></tr><tr><td>WidgetB</td><td class='num qty'>2</td><td class='num'>$500.00</td><td class='num total'>$1,000.00</td></tr><tr><td>GadgetX</td><td class='num qty'>5</td><td class='num'>$750.00</td><td class='num total'>$3,750.00</td></tr>
+        </table>
+        <div class='meta'>Revised invoice - additional items added per PO amendment</div>
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>{
+  &quot;invoice_number&quot;: &quot;INV-1004&quot;,
+  &quot;revision&quot;: &quot;R1&quot;,
+  &quot;vendor&quot;: {
+    &quot;name&quot;: &quot;Precision Parts Ltd.&quot;,
+    &quot;address&quot;: &quot;742 Evergreen Terrace, Springfield, IL 62704&quot;
+  },
+  &quot;date&quot;: &quot;2026-01-22&quot;,
+  &quot;due_date&quot;: &quot;2026-02-22&quot;,
+  &quot;line_items&quot;: [
+    {&quot;item&quot;: &quot;WidgetA&quot;, &quot;quantity&quot;: 3, &quot;unit_price&quot;: 250.00},
+    {&quot;item&quot;: &quot;WidgetB&quot;, &quot;quantity&quot;: 2, &quot;unit_price&quot;: 500.00},
+    {&quot;item&quot;: &quot;GadgetX&quot;, &quot;quantity&quot;: 5, &quot;unit_price&quot;: 750.00}
+  ],
+  &quot;subtotal&quot;: 5500.00,
+  &quot;tax_rate&quot;: 0.08,
+  &quot;tax_amount&quot;: 440.00,
+  &quot;total&quot;: 5940.00,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;payment_terms&quot;: &quot;Net 30&quot;,
+  &quot;notes&quot;: &quot;Revised invoice - additional items added per PO amendment&quot;
+}
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1004_revised.json via fallback_regex: 3 item(s), stated=5940.0, recomputed=5940.0
+[validate] status=failed, 1 critical, 0 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: Invoice INV-1004 was already seen from invoice_1004.json at $1,890.00; this copy states $5,940.00. Held for reconciliation -- paying both would pay twice for the items common to each.</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1005</span>
+    <span class="vend">Global Supply Chain Partners</span>
+    <span class="amt">$15,225.00</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue critical'><div class='t'>Requested quantity exceeds stock on hand</div><div class='m'>&#x27;GadgetX&#x27;: 8 requested, 5 in stock</div><div class='a'><b>What to do:</b> Check the receiving log. If the goods arrived, inventory is stale; if not, query the quantity with the supplier.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: &#x27;GadgetX&#x27;: 8 requested, 5 in stock</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: yes
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1005</td></tr>
+          <tr><td>Vendor</td><td>Global Supply Chain Partners</td></tr>
+          <tr><td>Stated total</td><td class="num">$15,225.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$15,225.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-03-18</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>14</td><td class='num'>$250.00</td><td class='num total'>$3,500.00</td></tr><tr><td>GadgetX</td><td class='num qty'>8</td><td class='num'>$750.00</td><td class='num total'>$6,000.00</td></tr><tr><td>WidgetB</td><td class='num qty'>10</td><td class='num'>$500.00</td><td class='num total'>$5,000.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>{
+  &quot;invoice_number&quot;: &quot;INV-1005&quot;,
+  &quot;vendor&quot;: {
+    &quot;name&quot;: &quot;Global Supply Chain Partners&quot;,
+    &quot;address&quot;: &quot;1600 Pennsylvania Ave, Washington, DC 20500&quot;
+  },
+  &quot;date&quot;: &quot;2026-01-18&quot;,
+  &quot;due_date&quot;: &quot;2026-03-18&quot;,
+  &quot;line_items&quot;: [
+    {&quot;item&quot;: &quot;WidgetA&quot;, &quot;quantity&quot;: 14, &quot;unit_price&quot;: 250.00},
+    {&quot;item&quot;: &quot;GadgetX&quot;, &quot;quantity&quot;: 8, &quot;unit_price&quot;: 750.00},
+    {&quot;item&quot;: &quot;WidgetB&quot;, &quot;quantity&quot;: 10, &quot;unit_price&quot;: 500.00}
+  ],
+  &quot;subtotal&quot;: 14500.00,
+  &quot;tax_rate&quot;: 0.05,
+  &quot;tax_amount&quot;: 725.00,
+  &quot;total&quot;: 15225.00,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;payment_terms&quot;: &quot;Net 60&quot;
+}
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1005.json via fallback_regex: 3 item(s), stated=15225.0, recomputed=15225.0
+[validate] status=failed, 1 critical, 0 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: &#x27;GadgetX&#x27;: 8 requested, 5 in stock</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1008</span>
+    <span class="vend">NoProd Industries</span>
+    <span class="amt">$9,900.00</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue critical'><div class='t'>Item is not in the inventory catalogue</div><div class='m'>&#x27;MegaSprocket&#x27; is not in the inventory catalogue</div><div class='a'><b>What to do:</b> Check whether the item exists under a different name. If it is genuinely new, add it to the catalogue before paying.</div></div><div class='issue critical'><div class='t'>Item is not in the inventory catalogue</div><div class='m'>&#x27;SuperGizmo&#x27; is not in the inventory catalogue</div><div class='a'><b>What to do:</b> Check whether the item exists under a different name. If it is genuinely new, add it to the catalogue before paying.</div></div><div class='issue warning'><div class='t'>Amount sits just below the approval threshold</div><div class='m'>$9,900.00 sits just below the $10,000 approval threshold (1.0% under)</div><div class='a'><b>What to do:</b> Confirm this was not split from a larger order to stay under the $10,000 approval limit.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: &#x27;MegaSprocket&#x27; is not in the inventory catalogue; &#x27;SuperGizmo&#x27; is not in the inventory catalogue</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1008</td></tr>
+          <tr><td>Vendor</td><td>NoProd Industries</td></tr>
+          <tr><td>Stated total</td><td class="num">$9,900.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$9,900.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-01-20</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>SuperGizmo</td><td class='num qty'>12</td><td class='num'>$400.00</td><td class='num total'>$4,800.00</td></tr><tr><td>MegaSprocket</td><td class='num qty'>6</td><td class='num'>$850.00</td><td class='num total'>$5,100.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>From: billing@noproduct.biz
+To: accounts@acmecorp.com
+Subject: Invoice Attached - Please Process
+
+Hi,
+
+Please find the invoice details below:
+
+  Vendor: NoProd Industries
+  Invoice: INV-1008
+  Date: 2026-01-10
+  Due: 2026-01-20
+
+  Items Ordered:
+    - SuperGizmo       x12     $400.00 each
+    - MegaSprocket     x6      $850.00 each
+
+  Total: $9,900.00
+
+Please process at your earliest convenience.
+
+Best regards,
+Accounts Receivable
+NoProd Industries
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1008.txt via fallback_regex: 2 item(s), stated=9900.0, recomputed=9900.0
+[validate] status=failed, 2 critical, 1 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: &#x27;MegaSprocket&#x27; is not in the inventory catalogue; &#x27;SuperGizmo&#x27; is not in the inventory catalogue</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1009</span>
+    <span class="vend">Unidentified vendor</span>
+    <span class="amt">$-250.00</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue critical'><div class='t'>No vendor could be identified</div><div class='m'>No vendor could be identified on the invoice</div><div class='a'><b>What to do:</b> Request a complete invoice. Never pay without an identified payee.</div></div><div class='issue warning'><div class='t'>No usable due date</div><div class='m'>No usable due date; payment timing cannot be scheduled</div><div class='a'><b>What to do:</b> Confirm payment terms with the supplier so the payment can be scheduled.</div></div><div class='issue critical'><div class='t'>Quantity is negative or nonsensical</div><div class='m'>&#x27;WidgetA&#x27; has a negative quantity (-5)</div><div class='a'><b>What to do:</b> Return to the supplier for a corrected invoice. Do not adjust the quantity yourself.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: No vendor could be identified on the invoice; &#x27;WidgetA&#x27; has a negative quantity (-5)</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1009</td></tr>
+          <tr><td>Vendor</td><td>&amp;mdash;</td></tr>
+          <tr><td>Stated total</td><td class="num">$-250.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$-250.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>&amp;mdash;</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>-5</td><td class='num'>$250.00</td><td class='num total'>$-1,250.00</td></tr><tr><td>WidgetB</td><td class='num qty'>2</td><td class='num'>$500.00</td><td class='num total'>$1,000.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>{
+  &quot;invoice_number&quot;: &quot;INV-1009&quot;,
+  &quot;vendor&quot;: {
+    &quot;name&quot;: &quot;&quot;,
+    &quot;address&quot;: null
+  },
+  &quot;date&quot;: &quot;2026-01-15&quot;,
+  &quot;due_date&quot;: null,
+  &quot;line_items&quot;: [
+    {&quot;item&quot;: &quot;WidgetA&quot;, &quot;quantity&quot;: -5, &quot;unit_price&quot;: 250.00},
+    {&quot;item&quot;: &quot;WidgetB&quot;, &quot;quantity&quot;: 2, &quot;unit_price&quot;: 500.00}
+  ],
+  &quot;subtotal&quot;: 1000.00,
+  &quot;tax_rate&quot;: 0.0,
+  &quot;tax_amount&quot;: 0.00,
+  &quot;total&quot;: -250.00,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;payment_terms&quot;: &quot;&quot;
+}
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1009.json via fallback_regex: 2 item(s), stated=-250.0, recomputed=-250.0
+[validate] status=failed, 2 critical, 1 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: No vendor could be identified on the invoice; &#x27;WidgetA&#x27; has a negative quantity (-5)</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1014</span>
+    <span class="vend">TechParts International</span>
+    <span class="amt">$4,125.00</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue critical'><div class='t'>Not in USD and no exchange rate is available offline</div><div class='m'>Invoice is denominated in EUR; no exchange rate is available offline, so the payable amount is unknown</div><div class='a'><b>What to do:</b> Apply today&#x27;s exchange rate manually and confirm the payable amount before releasing payment.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: Invoice is denominated in EUR; no exchange rate is available offline, so the payable amount is unknown</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1014</td></tr>
+          <tr><td>Vendor</td><td>TechParts International</td></tr>
+          <tr><td>Stated total</td><td class="num">$4,125.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$4,125.00</td></tr>
+          <tr><td>Currency</td><td>EUR</td></tr>
+          <tr><td>Due</td><td>2026-02-26</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>4</td><td class='num'>$225.00</td><td class='num total'>$900.00</td></tr><tr><td>WidgetB</td><td class='num qty'>6</td><td class='num'>$475.00</td><td class='num total'>$2,850.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;invoice&gt;
+  &lt;header&gt;
+    &lt;invoice_number&gt;INV-1014&lt;/invoice_number&gt;
+    &lt;vendor&gt;TechParts International&lt;/vendor&gt;
+    &lt;date&gt;2026-01-26&lt;/date&gt;
+    &lt;due_date&gt;2026-02-26&lt;/due_date&gt;
+    &lt;currency&gt;EUR&lt;/currency&gt;
+  &lt;/header&gt;
+  &lt;line_items&gt;
+    &lt;item&gt;
+      &lt;name&gt;WidgetA&lt;/name&gt;
+      &lt;quantity&gt;4&lt;/quantity&gt;
+      &lt;unit_price&gt;225.00&lt;/unit_price&gt;
+    &lt;/item&gt;
+    &lt;item&gt;
+      &lt;name&gt;WidgetB&lt;/name&gt;
+      &lt;quantity&gt;6&lt;/quantity&gt;
+      &lt;unit_price&gt;475.00&lt;/unit_price&gt;
+    &lt;/item&gt;
+  &lt;/line_items&gt;
+  &lt;totals&gt;
+    &lt;subtotal&gt;3750.00&lt;/subtotal&gt;
+    &lt;tax_rate&gt;0.10&lt;/tax_rate&gt;
+    &lt;tax_amount&gt;375.00&lt;/tax_amount&gt;
+    &lt;total&gt;4125.00&lt;/total&gt;
+  &lt;/totals&gt;
+  &lt;payment_terms&gt;Net 30&lt;/payment_terms&gt;
+&lt;/invoice&gt;
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1014.xml via fallback_regex: 2 item(s), stated=4125.0, recomputed=4125.0
+[validate] status=failed, 1 critical, 0 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: Invoice is denominated in EUR; no exchange rate is available offline, so the payable amount is unknown</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card crit" data-bucket="attention">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1016</span>
+    <span class="vend">Widgets Inc.</span>
+    <span class="amt">$3,233.00</span>
+    <span class="pill held">Needs review</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue critical'><div class='t'>Item is not in the inventory catalogue</div><div class='m'>&#x27;WidgetC&#x27; is not in the inventory catalogue</div><div class='a'><b>What to do:</b> Check whether the item exists under a different name. If it is genuinely new, add it to the catalogue before paying.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Rejected at validation, before approval reasoning. Critical findings: &#x27;WidgetC&#x27; is not in the inventory catalogue</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1016</td></tr>
+          <tr><td>Vendor</td><td>Widgets Inc.</td></tr>
+          <tr><td>Stated total</td><td class="num">$3,233.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$3,233.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-27</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>4</td><td class='num'>$250.00</td><td class='num total'>$1,000.00</td></tr><tr><td>WidgetB</td><td class='num qty'>2</td><td class='num'>$500.00</td><td class='num total'>$1,000.00</td></tr><tr><td>WidgetC</td><td class='num qty'>3</td><td class='num'>$350.00</td><td class='num total'>$1,050.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>{
+  &quot;invoice_number&quot;: &quot;INV-1016&quot;,
+  &quot;vendor&quot;: {
+    &quot;name&quot;: &quot;Widgets Inc.&quot;,
+    &quot;address&quot;: &quot;100 Main St, Chicago, IL 60601&quot;
+  },
+  &quot;date&quot;: &quot;2026-01-27&quot;,
+  &quot;due_date&quot;: &quot;2026-02-27&quot;,
+  &quot;line_items&quot;: [
+    {&quot;item&quot;: &quot;WidgetA&quot;, &quot;quantity&quot;: 4, &quot;unit_price&quot;: 250.00, &quot;amount&quot;: 1000.00},
+    {&quot;item&quot;: &quot;WidgetB&quot;, &quot;quantity&quot;: 2, &quot;unit_price&quot;: 500.00, &quot;amount&quot;: 1000.00},
+    {&quot;item&quot;: &quot;WidgetC&quot;, &quot;quantity&quot;: 3, &quot;unit_price&quot;: 350.00, &quot;amount&quot;: 1050.00}
+  ],
+  &quot;subtotal&quot;: 3050.00,
+  &quot;tax_rate&quot;: 0.06,
+  &quot;tax_amount&quot;: 183.00,
+  &quot;total&quot;: 3233.00,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;payment_terms&quot;: &quot;Net 30&quot;
+}
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1016.json via fallback_regex: 3 item(s), stated=3233.0, recomputed=3233.0
+[validate] status=failed, 1 critical, 0 warning
+[reject_log] rejected: Rejected at validation, before approval reasoning. Critical findings: &#x27;WidgetC&#x27; is not in the inventory catalogue</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card warnrow" data-bucket="paid">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1012</span>
+    <span class="vend">QuickShip Distributers</span>
+    <span class="amt">$9,975.00</span>
+    <span class="pill paid">Paid</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue warning'><div class='t'>Amount sits just below the approval threshold</div><div class='m'>$9,975.00 sits just below the $10,000 approval threshold (0.2% under)</div><div class='a'><b>What to do:</b> Confirm this was not split from a larger order to stay under the $10,000 approval limit.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Inventory checks passed and the total reconciles. Non-blocking warnings noted: $9,975.00 sits just below the $10,000 approval threshold (0.2% under). These do not affect whether the invoice is payable.</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1012</td></tr>
+          <tr><td>Vendor</td><td>QuickShip Distributers</td></tr>
+          <tr><td>Stated total</td><td class="num">$9,975.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$9,975.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-25</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>Widget A</td><td class='num qty'>12</td><td class='num'>$250.00</td><td class='num total'>$3,000.00</td></tr><tr><td>WidgetB</td><td class='num qty'>7</td><td class='num'>$500.00</td><td class='num total'>$3,500.00</td></tr><tr><td>Gadget X</td><td class='num qty'>4</td><td class='num'>$750.00</td><td class='num total'>$3,000.00</td></tr>
+        </table>
+        <div class='meta'>OCR repair applied: capital &#x27;O&#x27; read as zero in numeric tokens</div><div class='meta'>Ref PO-20260115. Deliver to</div>
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>I N V O I C E
+FROM: QuickShip Distributers
+(formerly FastShip Ltd.)
+INV NO: INV 1012
+DATE: 26-Jan-2026
+DUE: 25-Feb-2026
+TO: ACME Corp
+Attn: Accounts Payble
+----------------------------------------
+ITEM QTY PRICE TOTAL
+----------------------------------------
+Widget A 12 $250 $3,000.00
+WidgetB 7 $500 $3,500.00
+Gadget X 4 $750 $3,000.00
+----------------------------------------
+SUBTOTAL: $9,500.00
+TAX (5%): $475.00
+TOTAL: $9,975.00
+NOTES: Ref PO-20260115. Deliver to
+warehouse dock B. Contact Jim
+at ext 4421 with questions.
+Terms: Net 30</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1012.pdf via fallback_regex: 3 item(s), stated=9975.0, recomputed=9975.0
+[validate] status=warning, 0 critical, 1 warning
+[approve_draft] rule-based decision=approved (round 0)
+[approve_critique] no usable critique; confirming draft
+[pay] paid 9975.0 to QuickShip Distributers</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card warnrow" data-bucket="blocked">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1012</span>
+    <span class="vend">QuickShip Distributers</span>
+    <span class="amt">$9,975.00</span>
+    <span class="pill blocked">Blocked</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue warning'><div class='t'>Amount sits just below the approval threshold</div><div class='m'>$9,975.00 sits just below the $10,000 approval threshold (0.2% under)</div><div class='a'><b>What to do:</b> Confirm this was not split from a larger order to stay under the $10,000 approval limit.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">Inventory checks passed and the total reconciles. Non-blocking warnings noted: $9,975.00 sits just below the $10,000 approval threshold (0.2% under). These do not affect whether the invoice is payable.</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1012</td></tr>
+          <tr><td>Vendor</td><td>QuickShip Distributers</td></tr>
+          <tr><td>Stated total</td><td class="num">$9,975.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$9,975.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-25</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>Widget A</td><td class='num qty'>12</td><td class='num'>$250.00</td><td class='num total'>$3,000.00</td></tr><tr><td>WidgetB</td><td class='num qty'>7</td><td class='num'>$500.00</td><td class='num total'>$3,500.00</td></tr><tr><td>Gadget X</td><td class='num qty'>4</td><td class='num'>$750.00</td><td class='num total'>$3,000.00</td></tr>
+        </table>
+        <div class='meta'>OCR repair applied: capital &#x27;O&#x27; read as zero in numeric tokens</div><div class='meta'>Ref PO-20260115. Deliver to</div>
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>                    I N V O I C E
+
+  FROM:  QuickShip Distributers
+         (formerly FastShip Ltd.)
+
+  INV NO:    INV 1012
+  DATE:      26-Jan-2026
+  DUE:       25-Feb-2026
+
+  TO:    ACME Corp
+         Attn: Accounts Payble
+
+  ----------------------------------------
+  ITEM          QTY    PRICE     TOTAL
+  ----------------------------------------
+  Widget A       12    $250     $3,000.00
+  WidgetB         7    $500     $3,500.00
+  Gadget X        4    $750     $3,000.00
+  ----------------------------------------
+                  SUBTOTAL:     $9,500.00
+                  TAX (5%):       $475.00
+                  TOTAL:        $9,975.00
+
+  NOTES: Ref PO-20260115. Deliver to
+         warehouse dock B. Contact Jim
+         at ext 4421 with questions.
+
+  Terms: Net 30
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1012.txt via fallback_regex: 3 item(s), stated=9975.0, recomputed=9975.0
+[validate] status=warning, 0 critical, 1 warning
+[approve_draft] rule-based decision=approved (round 0)
+[approve_critique] no usable critique; confirming draft
+[pay] blocked: INV-1012 already paid on 2026-07-24T01:42:25</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card okrow" data-bucket="paid">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1001</span>
+    <span class="vend">Widgets Inc.</span>
+    <span class="amt">$5,000.00</span>
+    <span class="pill paid">Paid</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue info'><div class='m'>No problems found. Every item was in catalogue with stock available, and the total reconciled.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">All line items are in catalogue with sufficient stock, the stated total reconciles to the line items, and no warnings were raised.</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1001</td></tr>
+          <tr><td>Vendor</td><td>Widgets Inc.</td></tr>
+          <tr><td>Stated total</td><td class="num">$5,000.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$5,000.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-01</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>10</td><td class='num'>$250.00</td><td class='num total'>$2,500.00</td></tr><tr><td>WidgetB</td><td class='num qty'>5</td><td class='num'>$500.00</td><td class='num total'>$2,500.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>INVOICE
+
+Vendor: Widgets Inc.
+Invoice Number: INV-1001
+Date: 2026-01-15
+Due Date: 2026-02-01
+
+Items:
+  WidgetA    qty: 10    unit price: $250.00
+  WidgetB    qty: 5     unit price: $500.00
+
+Subtotal: $5,000.00
+Tax (0%): $0.00
+Total Amount: $5,000.00
+
+Payment Terms: Net 15
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1001.txt via fallback_regex: 2 item(s), stated=5000.0, recomputed=5000.0
+[validate] status=passed, 0 critical, 0 warning
+[approve_draft] rule-based decision=approved (round 0)
+[approve_critique] no usable critique; confirming draft
+[pay] paid 5000.0 to Widgets Inc.</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card okrow" data-bucket="paid">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1004</span>
+    <span class="vend">Precision Parts Ltd.</span>
+    <span class="amt">$1,890.00</span>
+    <span class="pill paid">Paid</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue info'><div class='m'>No problems found. Every item was in catalogue with stock available, and the total reconciled.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">All line items are in catalogue with sufficient stock, the stated total reconciles to the line items, and no warnings were raised.</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1004</td></tr>
+          <tr><td>Vendor</td><td>Precision Parts Ltd.</td></tr>
+          <tr><td>Stated total</td><td class="num">$1,890.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$1,890.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-22</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>3</td><td class='num'>$250.00</td><td class='num total'>$750.00</td></tr><tr><td>WidgetB</td><td class='num qty'>2</td><td class='num'>$500.00</td><td class='num total'>$1,000.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>{
+  &quot;invoice_number&quot;: &quot;INV-1004&quot;,
+  &quot;vendor&quot;: {
+    &quot;name&quot;: &quot;Precision Parts Ltd.&quot;,
+    &quot;address&quot;: &quot;742 Evergreen Terrace, Springfield, IL 62704&quot;
+  },
+  &quot;date&quot;: &quot;2026-01-22&quot;,
+  &quot;due_date&quot;: &quot;2026-02-22&quot;,
+  &quot;line_items&quot;: [
+    {&quot;item&quot;: &quot;WidgetA&quot;, &quot;quantity&quot;: 3, &quot;unit_price&quot;: 250.00},
+    {&quot;item&quot;: &quot;WidgetB&quot;, &quot;quantity&quot;: 2, &quot;unit_price&quot;: 500.00}
+  ],
+  &quot;subtotal&quot;: 1750.00,
+  &quot;tax_rate&quot;: 0.08,
+  &quot;tax_amount&quot;: 140.00,
+  &quot;total&quot;: 1890.00,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;payment_terms&quot;: &quot;Net 30&quot;
+}
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1004.json via fallback_regex: 2 item(s), stated=1890.0, recomputed=1890.0
+[validate] status=passed, 0 critical, 0 warning
+[approve_draft] rule-based decision=approved (round 0)
+[approve_critique] no usable critique; confirming draft
+[pay] paid 1890.0 to Precision Parts Ltd.</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card okrow" data-bucket="paid">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1006</span>
+    <span class="vend">Acme Industrial Supplies</span>
+    <span class="amt">$2,750.00</span>
+    <span class="pill paid">Paid</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue info'><div class='m'>No problems found. Every item was in catalogue with stock available, and the total reconciled.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">All line items are in catalogue with sufficient stock, the stated total reconciles to the line items, and no warnings were raised.</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1006</td></tr>
+          <tr><td>Vendor</td><td>Acme Industrial Supplies</td></tr>
+          <tr><td>Stated total</td><td class="num">$2,750.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$2,750.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-10</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>5</td><td class='num'>$250.00</td><td class='num total'>$1,250.00</td></tr><tr><td>WidgetB</td><td class='num qty'>3</td><td class='num'>$500.00</td><td class='num total'>$1,500.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>field,value
+invoice_number,INV-1006
+vendor,Acme Industrial Supplies
+date,2026-01-25
+due_date,2026-02-10
+item,WidgetA
+quantity,5
+unit_price,250.00
+item,WidgetB
+quantity,3
+unit_price,500.00
+subtotal,2750.00
+tax,0.00
+total,2750.00
+payment_terms,Net 15
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1006.csv via fallback_regex: 2 item(s), stated=2750.0, recomputed=2750.0
+[validate] status=passed, 0 critical, 0 warning
+[approve_draft] rule-based decision=approved (round 0)
+[approve_critique] no usable critique; confirming draft
+[pay] paid 2750.0 to Acme Industrial Supplies</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card okrow" data-bucket="paid">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1010</span>
+    <span class="vend">Consolidated Materials Group</span>
+    <span class="amt">$7,185.00</span>
+    <span class="pill paid">Paid</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue info'><div class='m'>No problems found. Every item was in catalogue with stock available, and the total reconciled.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">All line items are in catalogue with sufficient stock, the stated total reconciles to the line items, and no warnings were raised.</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1010</td></tr>
+          <tr><td>Vendor</td><td>Consolidated Materials Group</td></tr>
+          <tr><td>Stated total</td><td class="num">$7,185.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$7,185.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-26</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>8</td><td class='num'>$250.00</td><td class='num total'>$2,000.00</td></tr><tr><td>WidgetB</td><td class='num qty'>4</td><td class='num'>$500.00</td><td class='num total'>$2,000.00</td></tr><tr><td>GadgetX</td><td class='num qty'>2</td><td class='num'>$750.00</td><td class='num total'>$1,500.00</td></tr><tr><td>WidgetA (rush order)</td><td class='num qty'>4</td><td class='num'>$300.00</td><td class='num total'>$1,200.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>INVOICE #INV-1010
+
+Bill To: Acme Corp Manufacturing Division
+
+Vendor: Consolidated Materials Group
+Date: January 27, 2026
+Due Date: February 26, 2026
+
+Description                Qty     Rate        Amount
+-------------------------------------------------------
+WidgetA                     8      $250.00     $2,000.00
+WidgetB                     4      $500.00     $2,000.00
+GadgetX                     2      $750.00     $1,500.00
+WidgetA (rush order)        4      $300.00     $1,200.00
+                                           -----------
+                               Subtotal:     $6,700.00
+                               Sales Tax:      $335.00
+                               Shipping:       $150.00
+                               TOTAL:        $7,185.00
+
+Payment Terms: Net 30
+Thank you for your business!
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1010.txt via fallback_regex: 4 item(s), stated=7185.0, recomputed=7185.0
+[validate] status=passed, 0 critical, 0 warning
+[approve_draft] rule-based decision=approved (round 0)
+[approve_critique] no usable critique; confirming draft
+[pay] paid 7185.0 to Consolidated Materials Group</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card okrow" data-bucket="paid">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1011</span>
+    <span class="vend">Summit Manufacturing Co.</span>
+    <span class="amt">$3,000.00</span>
+    <span class="pill paid">Paid</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue info'><div class='m'>No problems found. Every item was in catalogue with stock available, and the total reconciled.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">All line items are in catalogue with sufficient stock, the stated total reconciles to the line items, and no warnings were raised.</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1011</td></tr>
+          <tr><td>Vendor</td><td>Summit Manufacturing Co.</td></tr>
+          <tr><td>Stated total</td><td class="num">$3,000.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$3,000.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-20</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>6</td><td class='num'>$250.00</td><td class='num total'>$1,500.00</td></tr><tr><td>WidgetB</td><td class='num qty'>3</td><td class='num'>$500.00</td><td class='num total'>$1,500.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>INVOICE
+Invoice Number: INV-1011
+Vendor: Summit Manufacturing Co.
+Date: 2026-01-20
+Due Date: 2026-02-20
+Item Qty Unit Price Amount
+WidgetA 6 $250.00 $1,500.00
+WidgetB 3 $500.00 $1,500.00
+Total: $3,000.00</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1011.pdf via fallback_regex: 2 item(s), stated=3000.0, recomputed=3000.0
+[validate] status=passed, 0 critical, 0 warning
+[approve_draft] rule-based decision=approved (round 0)
+[approve_critique] no usable critique; confirming draft
+[pay] paid 3000.0 to Summit Manufacturing Co.</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card okrow" data-bucket="blocked">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1011</span>
+    <span class="vend">Summit Manufacturing Co.</span>
+    <span class="amt">$3,000.00</span>
+    <span class="pill blocked">Blocked</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue info'><div class='m'>No problems found. Every item was in catalogue with stock available, and the total reconciled.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">All line items are in catalogue with sufficient stock, the stated total reconciles to the line items, and no warnings were raised.</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1011</td></tr>
+          <tr><td>Vendor</td><td>Summit Manufacturing Co.</td></tr>
+          <tr><td>Stated total</td><td class="num">$3,000.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$3,000.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-20</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>6</td><td class='num'>$250.00</td><td class='num total'>$1,500.00</td></tr><tr><td>WidgetB</td><td class='num qty'>3</td><td class='num'>$500.00</td><td class='num total'>$1,500.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>INVOICE
+
+Invoice Number: INV-1011
+Vendor: Summit Manufacturing Co.
+Date: 2026-01-20
+Due Date: 2026-02-20
+
+Item                Qty     Unit Price      Amount
+--------------------------------------------------
+WidgetA              6       $250.00       $1,500.00
+WidgetB              3       $500.00       $1,500.00
+--------------------------------------------------
+                              Subtotal:    $3,000.00
+                              Tax (0%):       $0.00
+                              Total:       $3,000.00
+
+Payment Terms: Net 30
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1011.txt via fallback_regex: 2 item(s), stated=3000.0, recomputed=3000.0
+[validate] status=passed, 0 critical, 0 warning
+[approve_draft] rule-based decision=approved (round 0)
+[approve_critique] no usable critique; confirming draft
+[pay] blocked: INV-1011 already paid on 2026-07-24T01:42:25</pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card okrow" data-bucket="paid">
+  <div class="head" onclick="tog(this)">
+    <span class="chev">&#9656;</span>
+    <span class="id">INV-1015</span>
+    <span class="vend">Reliable Components Inc.</span>
+    <span class="amt">$6,500.00</span>
+    <span class="pill paid">Paid</span>
+  </div>
+  <div class="body">
+    <div class="sec">Findings</div>
+    <div class='issue info'><div class='m'>No problems found. Every item was in catalogue with stock available, and the total reconciled.</div></div>
+    <div class="sec">Decision</div>
+    <div class="reason">All line items are in catalogue with sufficient stock, the stated total reconciles to the line items, and no warnings were raised.</div>
+    <div class="meta">Critique rounds: 0
+      &nbsp;&middot;&nbsp; Extra scrutiny: no
+      &nbsp;&middot;&nbsp; Read by: fallback_regex</div>
+    <div class="cols">
+      <div>
+        <div class="sec">What we read</div>
+        <table>
+          <tr><td>Invoice</td><td>INV-1015</td></tr>
+          <tr><td>Vendor</td><td>Reliable Components Inc.</td></tr>
+          <tr><td>Stated total</td><td class="num">$6,500.00</td></tr>
+          <tr><td>Recomputed</td><td class="num">$6,500.00</td></tr>
+          <tr><td>Currency</td><td>USD</td></tr>
+          <tr><td>Due</td><td>2026-02-28</td></tr>
+        </table>
+        <div class="sec">Line items</div>
+        <table class="items">
+          <tr><th>Item</th><th class="num">Qty</th><th class="num">Unit price</th>
+              <th class="num">Line total</th></tr>
+          <tr><td>WidgetA</td><td class='num qty'>10</td><td class='num'>$250.00</td><td class='num total'>$2,500.00</td></tr><tr><td>WidgetB</td><td class='num qty'>5</td><td class='num'>$500.00</td><td class='num total'>$2,500.00</td></tr><tr><td>GadgetX</td><td class='num qty'>2</td><td class='num'>$750.00</td><td class='num total'>$1,500.00</td></tr>
+        </table>
+        
+      </div>
+      <div>
+        <div class="sec">Original document</div>
+        <pre>Invoice Number,Vendor,Date,Due Date,Item,Qty,Unit Price,Line Total
+INV-1015,Reliable Components Inc.,2026-01-29,2026-02-28,WidgetA,10,250.00,2500.00
+INV-1015,Reliable Components Inc.,2026-01-29,2026-02-28,WidgetB,5,500.00,2500.00
+INV-1015,Reliable Components Inc.,2026-01-29,2026-02-28,GadgetX,2,750.00,1500.00
+,,,,,,Subtotal:,6500.00
+,,,,,,Tax (0%):,0.00
+,,,,,,Total:,6500.00
+</pre>
+        <div class="sec">Audit trail</div>
+        <pre class="trail">[ingest] invoice_1015.csv via fallback_regex: 3 item(s), stated=6500.0, recomputed=6500.0
+[validate] status=passed, 0 critical, 0 warning
+[approve_draft] rule-based decision=approved (round 0)
+[approve_critique] no usable critique; confirming draft
+[pay] paid 6500.0 to Reliable Components Inc.</pre>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="empty" id="empty" style="display:none">Nothing in this queue.</div>
+  <footer>Select any invoice to see its findings, the decision, and the original document.</footer>
+</div><script>
+function tog(el){el.parentElement.classList.toggle('open')}
+function filt(btn,key){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  let shown=0;
+  document.querySelectorAll('.card').forEach(c=>{
+    const ok = key==='all' || c.dataset.bucket===key;
+    c.style.display = ok?'':'none';
+    if(ok) shown++;
+  });
+  document.getElementById('empty').style.display = shown?'none':'block';
+}
+</script></body></html>

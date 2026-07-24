@@ -1,0 +1,36 @@
+# Every dependency here is justified. Anything that could not be justified was
+# left out, and the reasons are at the bottom.
+
+# --- orchestration ---------------------------------------------------------
+langgraph>=1.2.5,<1.3.0        # StateGraph, conditional edges, the approval loop
+
+# --- prompting and output safety -------------------------------------------
+langchain-core>=1.4.9,<2.0.0   # ChatPromptTemplate: all prompts declared once, in
+                               # one file, with named variables instead of
+                               # f-strings scattered through agent code
+pydantic>=2.0                  # validates LLM JSON before it reaches shared state,
+                               # so a malformed response falls back cleanly instead
+                               # of writing a null vendor into a payment record
+
+# --- document ingestion ----------------------------------------------------
+pdfplumber>=0.11.0             # text-layer extraction from PDF invoices
+
+# --- LLM providers ---------------------------------------------------------
+# Exactly one is active per run, chosen by the LLM_PROVIDER env var. The brief
+# names Grok; these are the free-tier equivalents this build targets. Both are
+# imported only inside llm_client.py, so switching providers costs one file.
+groq>=0.11.0                   # default (LLM_PROVIDER=groq)
+google-generativeai>=0.8.0     # alternative (LLM_PROVIDER=gemini)
+
+# --- configuration ---------------------------------------------------------
+python-dotenv>=1.0.0           # reads the API key from .env if one exists
+
+# --- deliberately not included ---------------------------------------------
+# reportlab   -- only generates sample PDFs. The sample PDFs already exist, and
+#                nothing in the runtime pipeline creates one.
+# tenacity    -- retry logic is six lines in llm_client._complete and needs to
+#                behave differently per provider anyway.
+# rich        -- the terminal output is a fixed-width report, not a live UI. The
+#                review interface is the HTML dashboard, where the effort went.
+# CrewAI / AutoGen -- a second orchestration framework alongside LangGraph would
+#                be two ways to do one thing.
